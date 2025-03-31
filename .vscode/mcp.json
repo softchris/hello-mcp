@@ -1,0 +1,12 @@
+{
+    "inputs": [],
+    "servers": {
+       "hello-mcp": {
+           "command": "sh",
+           "args": [
+               "-c",
+               "cd /workspaces/hello-mcp && ./node_modules/.bin/tsc && node ./build/server.js"
+           ]
+       }
+    }
+}
