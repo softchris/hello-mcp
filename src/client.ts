@@ -6,11 +6,6 @@ import OpenAI from "openai";
 import { z } from "zod"; // Import zod for schema validation
 dotenv.config();
 
-// const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-// if (!OPENAI_API_KEY) {
-//   throw new Error("OPENAI_API_KEY is not set");
-// }
-
 function openAiToolAdapter(tool: {
   name: string;
   description?: string;
@@ -40,12 +35,6 @@ class MCPClient {
   private transport: Transport | null = null;
 
   constructor() {
-    /*
-    const openai = new OpenAI({
-    baseURL: "https://models.inference.ai.azure.com", // might need to change to this url in the future: https://models.github.ai/inference
-    apiKey: process.env.GITHUB_TOKEN,
-  });
-    */
 
     this.openai = new OpenAI({
         baseURL: "https://models.inference.ai.azure.com", // might need to change to this url in the future: https://models.github.ai/inference
@@ -109,9 +98,12 @@ class MCPClient {
           await this.callTools(message.tool_calls, toolResults, finalText)
         );
       } else {
+        console.log("Message response from LLM: ", message);
         finalText.push(message.content || "xx");
       }
     });
+
+    console.log("Final text before last LLM call", finalText.join("\n"));
 
     response = await this.openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -120,7 +112,7 @@ class MCPClient {
       });
 
       finalText.push(
-        response.choices[0].message.content || "??"
+        `[LLM response] \n ${response.choices[0].message.content}` || "??"
       );
 
     return finalText.join("\n");
@@ -140,13 +132,20 @@ class MCPClient {
         name: toolName,
         arguments: JSON.parse(args),
       });
+
+      console.log("Tool result: ", toolResult);
+
       toolResults.push({
         name: toolName,
         result: toolResult,
       });
+ 
       finalText.push(
-        `[Calling tool ${toolName} with args ${JSON.stringify(args)}]`
+        `[Calling tool ${toolName} with args ${JSON.stringify(args)}]`,
+             // @ts-ignore
+        `${toolResult.content[0].text}`
       );
+
     }
   }
   async cleanup() {
@@ -158,6 +157,14 @@ const client = new MCPClient();
 await client.connectToServer("http://localhost:4321/sse");
 console.log("Connected to MCP server");
 
-const query = "What is the sum of 2 and 3?";
+// const query = "Tell me about Star Wars planet Alderaan?";
+// const result = await client.processQuery(query);
+// console.log("Final result: \n ", result);
+
+// const query = "Is Luke shorter than a stormtrooper?";
+// const result = await client.processQuery(query);
+// console.log("Final result: \n ", result);
+
+const query = "all planets of Star Wars";
 const result = await client.processQuery(query);
-console.log("Final result: ", result);
+console.log("Final result: \n ", result);
