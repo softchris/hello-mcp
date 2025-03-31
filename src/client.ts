@@ -6,10 +6,10 @@ import OpenAI from "openai";
 import { z } from "zod"; // Import zod for schema validation
 dotenv.config();
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-if (!OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY is not set");
-}
+// const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// if (!OPENAI_API_KEY) {
+//   throw new Error("OPENAI_API_KEY is not set");
+// }
 
 function openAiToolAdapter(tool: {
   name: string;
@@ -89,7 +89,7 @@ class MCPClient {
     console.log("Tools: ", JSON.stringify(this.tools, null, 2));
 
     let response = await this.openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       max_tokens: 1000,
       messages,
       tools: this.tools,
@@ -114,7 +114,7 @@ class MCPClient {
     });
 
     response = await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         max_tokens: 1000,
         messages,
       });
